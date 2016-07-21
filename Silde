@@ -1,0 +1,59 @@
+ /*
+    * 滚动
+    *option为对象。
+    *option.wrap 为整个运行都包含的大容器，避免跟其它混淆 为jQ节点$()
+    *option.box 滚动小图的容器 为jQ节点$(),不设置则使用默认.j-small-box'
+    *option.arrow 前一张后一张的指针元素 为jQ节点$(),不设置则使用默认'.j-arrow'
+    *option.class 小图交互类 为'string',不设置则使用默认'active-img'
+    *option.img   切换时需要更换src的图片元素img  为jQ节点$(),不设置则使用默认'.j-big-img'
+    */
+    function Silde( option ){
+        var _box = option.wrap /*大容器*/
+            ,_sBox = option.box || $('.j-small-box',_box) /*小图容器*/
+            ,_li = $('li', _sBox)
+            ,len = _li.length
+            ,sWidth = _li.eq(0).outerWidth()
+            ,_wapper = _sBox.find('ul').css('width', sWidth * len)
+            ,_bigImg = option.img || $('.j-big-img', _box)
+            ,_arrow =  option.arrow || $('.j-arrow', _box)/*指针元素*/
+            ,allNum = ~~( _sBox.width() /  sWidth )
+            ,halfNum = ~~( allNum / 2 )
+            ,style = option.class || 'active-img'  /*指定类名*/
+            ,index = '0';
+
+        var scrollTheImg = function(){
+           _wapper.stop(true, false).animate({
+                'margin-left': -index * sWidth
+            }, 300);
+        }
+
+        _li.click(function(){
+            var that = $(this);
+
+            that.addClass(style).siblings('li').removeClass(style)
+           _bigImg.attr('src', $('img',this).attr('src') );
+
+            if ( that.index() >= halfNum ){
+		        //即要滚动的个数
+                var leftNum = that.index() - halfNum;
+
+                //如果滚动后存放在容器内的剩余个数少于容器能放的个数，则直接使用总数-容器里的个数。
+                index = len - leftNum <= allNum ?  (len - allNum) : leftNum
+            }
+
+            scrollTheImg()
+        }).eq(0).trigger('click')
+
+        _arrow.click(function () {
+            var type = $(this).attr('data-type');
+
+            if ( type == 'prve' ){
+                if ( index > 0 ) index--
+            } else {
+                //最多能容纳
+                if ( index < (len - allNum)) index++
+            }
+
+            scrollTheImg()
+        })
+    }
